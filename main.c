@@ -1,6 +1,13 @@
 /*-------------------------------------------------------------------------- *
  *                                                                           * 
- *                         ****  ScarsFun  ****                              *
+ *                                                                           *
+ *               ____                     _____                              *
+ *              / ___|  ___ __ _ _ __ ___|  ___|   _ _ __                    *
+ *              \___ \ / __/ _` | '__/ __| |_ | | | | '_ \                   *
+ *               ___) | (_| (_| | |  \__ \  _|| |_| | | | |                  *
+ *              |____/ \___\__,_|_|  |___/_|   \__,_|_| |_|                  *
+ *                                                                           *
+ *                                                                           *
  *   15/02/2019                                                              * 
  *                                                                           * 
  *                                                                           * 
@@ -47,7 +54,6 @@
 
 static lv_group_t* g; //An Object Group
 static lv_indev_t* encoder_indev; //The input device
-static uint16_t _hue;
 const uint32_t led_intensity[10] = { 1, 14, 68, 207, 490, 990, 1793, 2998, 4718, 70199 };
 
 lv_obj_t* chart1, *slider, *spinbox;
@@ -89,7 +95,6 @@ static lv_res_t button_action(lv_obj_t* btn)
 
 static lv_res_t slider_action(lv_obj_t* slider)
 {
-    //TIM3->CCR3 = (lv_slider_get_value(slider))*71;
     TIM3->CCR3 = led_intensity[lv_slider_get_value(slider) - 1];
     return LV_RES_OK;
 }
@@ -112,16 +117,15 @@ static lv_res_t spinbox_action(lv_obj_t* cb)
         osTimerStop(timer1_id);
         GPIO_WriteBit(GPIOB, GPIO_Pin_8, Bit_RESET);
     }
-    else
+    else {
+        osTimerStop(timer1_id);
         osTimerStart(timer1_id, spinbox_value * 50);
-	  return LV_RES_OK;
+    }
+    return LV_RES_OK;
 }
-
 
 static void gui_create(void)
 {
-    //lv_font_add(&lv_font_symbol_14, &Envy_C_14);
-    //lv_theme_t* th = lv_theme_zen_init(240, &Envy_C_14);
     lv_theme_t* th = lv_theme_zen_init(240, NULL);
     lv_theme_set_current(th);
     lv_obj_t* scr = lv_cont_create(NULL, NULL);
@@ -144,43 +148,37 @@ static void gui_create(void)
     lv_obj_align(slider, btn, LV_ALIGN_OUT_RIGHT_TOP, 30, 5);
     lv_bar_set_range(slider, 1, 10);
     lv_obj_set_hidden(slider, true);
-    //lv_group_add_obj(g, slider); //Add to the group
-		
-		static lv_style_t spinBoxStyle;
+
+    static lv_style_t spinBoxStyle;
     lv_style_copy(&spinBoxStyle, th->cont);
     spinBoxStyle.text.font = &lv_font_dejavu_30;
-		
+
     spinbox = lv_spinbox_create(lv_scr_act(), NULL);
-   // lv_spinbox_set_style(spinbox, LV_SPINBOX_STYLE_BG, &spinBoxStyle);
-   // lv_spinbox_set_style(spinbox, LV_SPINBOX_STYLE_CURSOR, &spinBoxCursorStyle);
-	  lv_spinbox_set_style(spinbox, LV_SPINBOX_STYLE_BG, &spinBoxStyle);;
-	  lv_spinbox_set_digit_format(spinbox, 2, 0);
+    lv_spinbox_set_style(spinbox, LV_SPINBOX_STYLE_BG, &spinBoxStyle);
+    ;
+    lv_spinbox_set_digit_format(spinbox, 2, 0);
     lv_spinbox_set_range(spinbox, 0, 99);
-    lv_obj_set_size(spinbox, 110,55);
+    lv_obj_set_size(spinbox, 110, 55);
     lv_obj_align(spinbox, slider, LV_ALIGN_OUT_RIGHT_TOP, 10, -10);
     lv_spinbox_set_value_changed_cb(spinbox, spinbox_action);
-  	lv_group_add_obj(g, spinbox);
+    lv_group_add_obj(g, spinbox);
 
     lv_obj_t* cb = lv_cb_create(lv_scr_act(), NULL); //check box
     lv_cb_set_text(cb, "GRAPH");
     lv_group_add_obj(g, cb); //Add to the group
     lv_cb_set_action(cb, cb_release_action);
     lv_obj_align(cb, btn, LV_ALIGN_IN_BOTTOM_LEFT, 0, 40);
-		
 
     chart1 = lv_chart_create(lv_scr_act(), NULL);
     lv_obj_set_size(chart1, 310, 130);
     lv_obj_set_pos(chart1, 4, 100);
-    //lv_obj_align(chart1, cb,  LV_ALIGN_OUT_BOTTOM_LEFT, -10, 15);
-    //lv_chart_set_series_darking(chart1, LV_OPA_90);
-   // lv_chart_set_series_opa(chart1, LV_OPA_40);
     lv_chart_set_series_width(chart1, 2);
     lv_chart_set_type(chart1, LV_CHART_TYPE_POINT | LV_CHART_TYPE_LINE);
     lv_chart_set_range(chart1, 0, 120);
     lv_chart_set_div_line_count(chart1, 4, 0);
     dl2_1 = lv_chart_add_series(chart1, LV_COLOR_RED);
-		
-		lv_group_set_wrap(g, true);
+
+    lv_group_set_wrap(g, true);
 }
 void timer1_callback(void* param)
 {
@@ -190,7 +188,7 @@ void timer1_callback(void* param)
 }
 void timer2_callback(void* param)
 {
-    GPIOB->ODR ^=(1<< 8); //toggle PB8 LED
+    GPIOB->ODR ^= (1 << 8); //toggle PB8 LED
 }
 
 // LVGL refresh thread , Standby after 10secs rotary encoder inactivity
@@ -215,8 +213,8 @@ void app_main(void* argument)
 
     ILI9341_init();
     PWM_Init();
-	
-	  LED_PB8_init();
+
+    LED_PB8_init();
 
     lv_init();
     lv_disp_drv_t disp;
@@ -231,9 +229,7 @@ void app_main(void* argument)
     indev_drv.read = encoder_read;
     encoder_indev = lv_indev_drv_register(&indev_drv);
 
-    //Create an object group
     g = lv_group_create();
-    //Assig the input device(s) to the created group
     lv_indev_set_group(encoder_indev, g);
 
     gui_create();
