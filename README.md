@@ -1,4 +1,4 @@
- #ScarsFun Simple LittleVgl test 
+ # ScarsFun Simple LittleVgl test 
 
  *   Custom STM32F103RC breakout Board (72Mhz, 64K ram, 256K Flash) .        
  *   ILI9341 display over SPI with DMA. rotary encoder.                      
@@ -7,7 +7,7 @@
 
  LittleVgl: https://littlevgl.com
 
- ![alt text](/images/Scarsfun11a.png)
- ![alt text](/images/test_board.png)
+ ![board](/images/Scarsfun11a.png)
+ ![test](/images/test_board.png)
 
 
