@@ -155,7 +155,6 @@ static void gui_create(void)
 
     spinbox = lv_spinbox_create(lv_scr_act(), NULL);
     lv_spinbox_set_style(spinbox, LV_SPINBOX_STYLE_BG, &spinBoxStyle);
-    ;
     lv_spinbox_set_digit_format(spinbox, 2, 0);
     lv_spinbox_set_range(spinbox, 0, 99);
     lv_obj_set_size(spinbox, 110, 55);
@@ -164,7 +163,7 @@ static void gui_create(void)
     lv_group_add_obj(g, spinbox);
 
     lv_obj_t* cb = lv_cb_create(lv_scr_act(), NULL); //check box
-    lv_cb_set_text(cb, "GRAPH");
+    lv_cb_set_text(cb, "CHART");
     lv_group_add_obj(g, cb); //Add to the group
     lv_cb_set_action(cb, cb_release_action);
     lv_obj_align(cb, btn, LV_ALIGN_IN_BOTTOM_LEFT, 0, 40);
