@@ -554,11 +554,11 @@ ARM Macro Assembler    Page 9
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
 ork --depend=.\objects\startup_stm32f10x_hd.d -o.\objects\startup_stm32f10x_hd.
 o -I.\RTE\CMSIS -I.\RTE\Device\STM32F103RC -I.\RTE\_LittlevGL -IC:\Keil_v5\ARM\
-PACK\ARM\CMSIS\5.4.0\CMSIS\Core\Include -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.4.0\C
-MSIS\RTOS2\Include -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.4.0\CMSIS\RTOS2\RTX\Includ
+PACK\ARM\CMSIS\5.5.1\CMSIS\Core\Include -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.5.1\C
+MSIS\RTOS2\Include -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.5.1\CMSIS\RTOS2\RTX\Includ
 e -IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include -IC:\Keil_v5\AR
 M\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\StdPeriph_Driver\inc --predefine="__MICR
-OLIB SETA 1" --predefine="__UVISION_VERSION SETA 525" --predefine="_RTE_ SETA 1
+OLIB SETA 1" --predefine="__UVISION_VERSION SETA 527" --predefine="_RTE_ SETA 1
 " --predefine="STM32F10X_HD SETA 1" --list=.\listings\startup_stm32f10x_hd.lst 
 RTE\Device\STM32F103RC\startup_stm32f10x_hd.s
 

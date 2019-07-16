@@ -14,6 +14,7 @@
  *   https://github.com/ScarsFun                                             * 
  *   littleVgl DEMO.                                                         * 
  *                                                                           *
+ *   LittleVgl (5.3)                                                         * 
  *   Custom STM32F103RC Board (72Mhz, 64K ram, 256K Flash) .                 * 
  *   ILI9341 display over SPI with DMA. rotary encoder.                      *
  *   KEIL RTX v5.                                                            * 
@@ -56,7 +57,7 @@ static lv_group_t* g; //An Object Group
 static lv_indev_t* encoder_indev; //The input device
 const uint32_t led_intensity[10] = { 1, 14, 68, 207, 490, 990, 1793, 2998, 4718, 70199 };
 
-lv_obj_t* chart1, *slider, *spinbox;
+lv_obj_t* chart1, *slider, *spinbox; 
 lv_chart_series_t* dl2_1;
 
 const osThreadAttr_t lvgl_refresh_Thread_attr = {
@@ -130,7 +131,7 @@ static void gui_create(void)
     lv_theme_set_current(th);
     lv_obj_t* scr = lv_cont_create(NULL, NULL);
     lv_scr_load(scr);
-    lv_cont_set_style(scr, th->bg);
+    //lv_cont_set_style(scr, th->bg);
 
     lv_obj_t* btn = lv_btn_create(lv_scr_act(), NULL);
     lv_obj_set_size(btn, 30, 30);
@@ -150,7 +151,7 @@ static void gui_create(void)
     lv_obj_set_hidden(slider, true);
 
     static lv_style_t spinBoxStyle;
-    lv_style_copy(&spinBoxStyle, th->cont);
+    lv_style_copy(&spinBoxStyle, th->spinbox.bg);
     spinBoxStyle.text.font = &lv_font_dejavu_30;
 
     spinbox = lv_spinbox_create(lv_scr_act(), NULL);
@@ -166,8 +167,12 @@ static void gui_create(void)
     lv_cb_set_text(cb, "CHART");
     lv_group_add_obj(g, cb); //Add to the group
     lv_cb_set_action(cb, cb_release_action);
-    lv_obj_align(cb, btn, LV_ALIGN_IN_BOTTOM_LEFT, 0, 40);
-
+    lv_obj_align(cb, btn, LV_ALIGN_IN_BOTTOM_LEFT, 0, 35);
+		
+	lv_obj_t* label = lv_label_create(lv_scr_act(), NULL);
+	lv_label_set_text(label, "LittleVgl V5.3");
+	lv_obj_align(label, cb, LV_ALIGN_IN_BOTTOM_LEFT, 90, 15);
+	
     chart1 = lv_chart_create(lv_scr_act(), NULL);
     lv_obj_set_size(chart1, 310, 130);
     lv_obj_set_pos(chart1, 4, 100);
