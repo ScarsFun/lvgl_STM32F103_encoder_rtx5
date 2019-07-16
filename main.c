@@ -8,12 +8,13 @@
  *              |____/ \___\__,_|_|  |___/_|   \__,_|_| |_|                  *
  *                                                                           *
  *                                                                           *
- *   15/02/2019                                                              * 
+ *   15/07/2019                                                              * 
  *                                                                           * 
  *                                                                           * 
  *   https://github.com/ScarsFun                                             * 
  *   littleVgl DEMO.                                                         * 
  *                                                                           *
+ *   LittleVgl (6.0)                                                         *
  *   Custom STM32F103RC Board (72Mhz, 64K ram, 256K Flash) .                 * 
  *   ILI9341 display over SPI with DMA. rotary encoder.                      *
  *   KEIL RTX v5.                                                            * 
@@ -64,7 +65,7 @@ const osThreadAttr_t lvgl_refresh_Thread_attr = {
 };
 
 const osThreadAttr_t main_app_attr = {
-    .stack_size = 1024 // Create the thread stack with a size of 1024 bytes
+    .stack_size = 1280 // Create the thread stack with a size of 1024 bytes
 };
 
 void timer1_callback(void* param);
@@ -76,10 +77,12 @@ osTimerId_t timer0_id, timer1_id;
 osEventFlagsId_t LVGL_rfr_evt_id;
 osStatus_t status;
 
-static lv_res_t button_action(lv_obj_t* btn)
+void button_event_cb(lv_obj_t* btn, lv_event_t event)
 {
     // button is clicked
-    if (lv_btn_get_state(btn) == 0) {
+    if (event == LV_EVENT_CLICKED) {
+			if (lv_btn_get_state(btn) == 0)
+		{
         TIM3->CCR3 = 0;
         lv_group_remove_obj(slider);
         lv_obj_set_hidden(slider, true);
@@ -90,38 +93,40 @@ static lv_res_t button_action(lv_obj_t* btn)
         lv_group_add_obj(g, slider);
         lv_obj_set_hidden(slider, false);
     }
-    return LV_RES_OK;
+	}
 }
 
-static lv_res_t slider_action(lv_obj_t* slider)
+static void slider_event_cb(lv_obj_t* slider, lv_event_t event)
 {
-    TIM3->CCR3 = led_intensity[lv_slider_get_value(slider) - 1];
-    return LV_RES_OK;
+    if (event == LV_EVENT_VALUE_CHANGED)
+        TIM3->CCR3 = led_intensity[lv_slider_get_value(slider) - 1];
 }
 
-static lv_res_t cb_release_action(lv_obj_t* cb)
+static void checkb_event_cb(lv_obj_t* checkb, lv_event_t event)
 {
-    //A check box is clicked
-    if (lv_cb_is_checked(cb)) {
-        status = osTimerStart(timer0_id, 1000);
+    if (event == LV_EVENT_CLICKED) //A check box is clicked
+    {
+        if (lv_cb_is_checked(checkb)) {
+            status = osTimerStart(timer0_id, 1000);
+        }
+        else
+            osTimerStop(timer0_id);
     }
-    else
-        osTimerStop(timer0_id);
-    return LV_RES_OK;
 }
 
-static lv_res_t spinbox_action(lv_obj_t* cb)
+static void spinbox_event_cb(lv_obj_t* spinbox, lv_event_t event)
 {
-    uint16_t spinbox_value = lv_spinbox_get_value(cb);
-    if (spinbox_value == 0) {
-        osTimerStop(timer1_id);
-        GPIO_WriteBit(GPIOB, GPIO_Pin_8, Bit_RESET);
+    if (event == LV_EVENT_VALUE_CHANGED) {
+        uint16_t spinbox_value = lv_spinbox_get_value(spinbox);
+        if (spinbox_value == 0) {
+            osTimerStop(timer1_id);
+            GPIO_WriteBit(GPIOB, GPIO_Pin_8, Bit_RESET);
+        }
+        else {
+            osTimerStop(timer1_id);
+            osTimerStart(timer1_id, spinbox_value * 50);
+        }
     }
-    else {
-        osTimerStop(timer1_id);
-        osTimerStart(timer1_id, spinbox_value * 50);
-    }
-    return LV_RES_OK;
 }
 
 static void gui_create(void)
@@ -130,44 +135,48 @@ static void gui_create(void)
     lv_theme_set_current(th);
     lv_obj_t* scr = lv_cont_create(NULL, NULL);
     lv_scr_load(scr);
-    lv_cont_set_style(scr, th->bg);
 
+    // Create Power toggle button
     lv_obj_t* btn = lv_btn_create(lv_scr_act(), NULL);
     lv_obj_set_size(btn, 30, 30);
     lv_btn_set_toggle(btn, true);
-    lv_btn_set_action(btn, LV_BTN_ACTION_CLICK, button_action);
+    lv_obj_set_event_cb(btn, button_event_cb);
     lv_obj_t* btn_label = lv_label_create(btn, NULL);
-    lv_label_set_text(btn_label, SYMBOL_POWER);
+    lv_label_set_text(btn_label, LV_SYMBOL_POWER);
     lv_group_add_obj(g, btn);
     lv_obj_set_pos(btn, 15, 15);
 
     //Create a slider
     slider = lv_slider_create(lv_scr_act(), NULL);
     lv_obj_set_size(slider, 120, 25);
-    lv_slider_set_action(slider, slider_action);
+    lv_obj_set_event_cb(slider, slider_event_cb);
     lv_obj_align(slider, btn, LV_ALIGN_OUT_RIGHT_TOP, 30, 5);
     lv_bar_set_range(slider, 1, 10);
     lv_obj_set_hidden(slider, true);
-
+		
     static lv_style_t spinBoxStyle;
-    lv_style_copy(&spinBoxStyle, th->cont);
-    spinBoxStyle.text.font = &lv_font_dejavu_30;
+    lv_style_copy(&spinBoxStyle, th->style.spinbox.bg);
+    spinBoxStyle.text.font = &lv_font_roboto_28;
 
     spinbox = lv_spinbox_create(lv_scr_act(), NULL);
     lv_spinbox_set_style(spinbox, LV_SPINBOX_STYLE_BG, &spinBoxStyle);
-    ;
+
     lv_spinbox_set_digit_format(spinbox, 2, 0);
     lv_spinbox_set_range(spinbox, 0, 99);
     lv_obj_set_size(spinbox, 110, 55);
     lv_obj_align(spinbox, slider, LV_ALIGN_OUT_RIGHT_TOP, 10, -10);
-    lv_spinbox_set_value_changed_cb(spinbox, spinbox_action);
+    lv_obj_set_event_cb(spinbox, spinbox_event_cb);
     lv_group_add_obj(g, spinbox);
 
-    lv_obj_t* cb = lv_cb_create(lv_scr_act(), NULL); //check box
-    lv_cb_set_text(cb, "GRAPH");
-    lv_group_add_obj(g, cb); //Add to the group
-    lv_cb_set_action(cb, cb_release_action);
-    lv_obj_align(cb, btn, LV_ALIGN_IN_BOTTOM_LEFT, 0, 40);
+    lv_obj_t* checkb = lv_cb_create(lv_scr_act(), NULL); //check box
+    lv_cb_set_text(checkb, "GRAPH");
+    lv_group_add_obj(g, checkb); //Add to the group
+    lv_obj_set_event_cb(checkb, checkb_event_cb);
+    lv_obj_align(checkb, btn, LV_ALIGN_IN_BOTTOM_LEFT, 0, 40);
+
+    lv_obj_t* label = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(label, "LittleVgl V6.0");
+    lv_obj_align(label, checkb, LV_ALIGN_IN_BOTTOM_LEFT, 90, 15);
 
     chart1 = lv_chart_create(lv_scr_act(), NULL);
     lv_obj_set_size(chart1, 310, 130);
@@ -179,6 +188,7 @@ static void gui_create(void)
     dl2_1 = lv_chart_add_series(chart1, LV_COLOR_RED);
 
     lv_group_set_wrap(g, true);
+		
 }
 void timer1_callback(void* param)
 {
@@ -211,22 +221,26 @@ void lvgl_refresh_Thread(void* argument)
 void app_main(void* argument)
 {
 
+	lv_init();
     ILI9341_init();
     PWM_Init();
-
     LED_PB8_init();
 
-    lv_init();
-    lv_disp_drv_t disp;
-    lv_disp_drv_init(&disp);
-    disp.disp_flush = ILI9341_flush;
-    lv_disp_drv_register(&disp);
+    static lv_disp_buf_t disp_buf;
+    static lv_color_t buf_1[LV_HOR_RES_MAX * 10];
+    lv_disp_buf_init(&disp_buf, buf_1, NULL, LV_HOR_RES_MAX * 10);
+
+    lv_disp_drv_t disp_drv;
+    lv_disp_drv_init(&disp_drv);
+    disp_drv.buffer = &disp_buf;
+    disp_drv.flush_cb = ILI9341_flush;
+    lv_disp_drv_register(&disp_drv);
 
     encoder_init();
     lv_indev_drv_t indev_drv;
     lv_indev_drv_init(&indev_drv);
     indev_drv.type = LV_INDEV_TYPE_ENCODER;
-    indev_drv.read = encoder_read;
+    indev_drv.read_cb = encoder_read;
     encoder_indev = lv_indev_drv_register(&indev_drv);
 
     g = lv_group_create();

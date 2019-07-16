@@ -51,7 +51,7 @@ void encoder_init(void)
 /**
  
  */
-bool encoder_read(lv_indev_data_t * data)
+bool encoder_read (lv_indev_drv_t * drv, lv_indev_data_t*data) 
 {
   data->enc_diff = TIM4_read();
   if(!enc_pressed()){
