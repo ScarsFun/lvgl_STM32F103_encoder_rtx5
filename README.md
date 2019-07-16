@@ -1,13 +1,7 @@
  # ScarsFun Simple LittleVgl test project
 
+### LittleVgl V5.3
 
- *	 ```javascript
-function fancyAlert(arg) {
-  if(arg) {
-    $.facebox({div:'#LittleVgl V5.3'})
-  }
-}
-```	
  *   Custom STM32F103RC breakout Board (72Mhz, 64K ram, 256K Flash) .        
  *   ILI9341 display over SPI with DMA. rotary encoder.                      
  *   KEIL RTXv5 RTOS. 
