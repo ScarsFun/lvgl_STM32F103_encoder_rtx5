@@ -852,6 +852,11 @@
               <FileType>1</FileType>
               <FilePath>.\lvgl\src\lv_themes\lv_theme_zen.c</FilePath>
             </File>
+            <File>
+              <FileName>lv_async.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\lvgl\src\lv_misc\lv_async.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
